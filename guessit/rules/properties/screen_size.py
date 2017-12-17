@@ -13,16 +13,21 @@ from ..common.validators import seps_surround
 from ..common import dash, seps
 from ...reutils import build_or_pattern
 
-interlaced = frozenset({'360', '480', '576', '900', '1080'})
-progressive = frozenset(interlaced | {'368', '720', '2160', '4320'})
 
-
-def screen_size():
+def screen_size(config):
     """
     Builder for rebulk object.
+
+    :param config: rule configuration
+    :type config: dict
     :return: Created Rebulk object
     :rtype: Rebulk
     """
+    interlaced = frozenset({res for res in config['interlaced']})
+    progressive = frozenset({res for res in config['progressive']})
+    min_ar = config['min_ar']
+    max_ar = config['max_ar']
+
     rebulk = Rebulk(disabled=lambda context: is_disabled(context, 'screen_size'))
     rebulk = rebulk.string_defaults(ignore_case=True).regex_defaults(flags=re.IGNORECASE)
 
@@ -37,7 +42,7 @@ def screen_size():
     rebulk.regex(r'(?P<width>\d{3,4})-?(?:x|\*)-?(?P<height>\d{3,4})',
                  conflict_solver=lambda match, other: '__default__' if other.name == 'screen_size' else other)
 
-    rebulk.rules(PostProcessScreenSize(progressive), ScreenSizeOnlyOne, RemoveScreenSizeConflicts)
+    rebulk.rules(PostProcessScreenSize(progressive, min_ar, max_ar), ScreenSizeOnlyOne, RemoveScreenSizeConflicts)
 
     return rebulk
 
@@ -53,7 +58,7 @@ class PostProcessScreenSize(Rule):
     """
     consequence = AppendMatch
 
-    def __init__(self, standard_heights, min_ar=1.333, max_ar=1.898):
+    def __init__(self, standard_heights, min_ar, max_ar):
         super(PostProcessScreenSize, self).__init__()
         self.standard_heights = standard_heights
         self.min_ar = min_ar
