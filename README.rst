@@ -57,9 +57,8 @@ To migrate from guessit ``0.x`` or ``1.x``, please read
 Install
 -------
 
-Installing GuessIt is simple with `pip <http://www.pip-installer.org/>`_::
-
-    $ pip install guessit
+Installing GuessIt is simple 
+    $ sudo snap install guessita
 
 You can also `install GuessIt from sources <https://github.com/guessit-io/guessit/blob/master/docs/sources.rst>`_
 
